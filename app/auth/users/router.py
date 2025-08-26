@@ -9,7 +9,6 @@ from app.auth.users.services import UserService
 
 # add router
 router = APIRouter(
-    prefix="/users",
     tags=["users"]
 )
 
@@ -17,7 +16,7 @@ router = APIRouter(
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     #create a user
     try:
-        return UserCreate.create_user(db, user)
+        return UserService.create_user(db, user)
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -39,11 +38,13 @@ def get_all_users(skip:int = 0, limit:int = 100, role: Optional[str] = None, db:
         )
 
 
-@router.get("/", response_model=UserResponse)
+@router.get("/{user_id}", response_model=UserResponse)
 def get_user_by_id(user_id:int, db:Session = Depends(get_db)):
     #get user by id
     try:
         return UserService.get_user_by_id(db,user_id)
+    except HTTPException as he:
+        raise he
     except HTTPException as e:
         raise HTTPException (
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -71,3 +72,18 @@ def get_user_by_email(email:str, db:Session = Depends(get_db)):
             detail=f"error fetching data, error: {str(e)}"
         )
 
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    # delete user by id 
+    try:
+        user = UserService.get_user_by_id(db, user_id)
+        db.delete(user)
+        db.commit()
+        return None
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting user: {str(e)}"
+        )

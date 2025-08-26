@@ -60,11 +60,10 @@ class UserService:
         db.commit()
         db.refresh(db_user)
         return db_user
-        
     
-
-#     @staticmethod
-#     def delete_user(db: Session, user_id: int) -> None:
-#         user = UserService.get_user_by_id(db, user_id)
-#         db.delete(user)
-#         db.commit()
+    @staticmethod
+    def delete_user(db:Session, user_id: int) -> None:
+        user = UserService.get_user_by_id(db, user_id)
+        db.delete(user)
+        db.commit()
+        
