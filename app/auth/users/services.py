@@ -13,16 +13,6 @@ from app.auth.users.models import User
 from app.auth.users.schemas import UserCreate
 
 
-# class UserService:
-#     @staticmethod
-#     def get_user_by_id(db: Session, user_id: int) -> User:
-#         user = db.query(User).filter(User.id == user_id).first()
-#         if not user:
-#             raise HTTPException(
-#                 status_code=status.HTTP_404_NOT_FOUND,
-#                 detail="User not found"
-#             )
-#         return user
 class UserService:
     @staticmethod
     def get_user_by_id(db: Session, user_id:int) -> User:
@@ -41,6 +31,7 @@ class UserService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="User not found"
             )
+        return user
     @staticmethod
     def get_all_user(db:Session, skip: int=0, limit: int = 100, role: Optional[str]= None ) -> List[User]:
         query = db.query(User)
@@ -55,7 +46,7 @@ class UserService:
         existing_user = db.query(User).filter(User.email == user_data.email).first()
         if existing_user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_400_NOT_FOUND,
                 detail="User already exist, can't create new user using same email"
             )
         
