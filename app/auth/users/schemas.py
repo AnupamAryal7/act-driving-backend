@@ -8,7 +8,7 @@ class UserBase(BaseModel):
     email: str = Field(..., description="user email address")
     role: str = Field(..., description="role field for student, instructor and admin")
 
-class CreateUser(UserBase):
+class UserCreate(UserBase):
     password: str = Field(..., min_length=6, description="Password must contain atleast 6 character")
 
     @field_validator('role')
