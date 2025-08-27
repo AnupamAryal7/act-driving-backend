@@ -34,3 +34,7 @@ class UserResponse(UserBase):
 
     class Config:
         from_attributes = True
+
+class UserLogin(BaseModel):
+    email:str = Field(..., description="Email id required")
+    password:str = Field(..., description="password field")

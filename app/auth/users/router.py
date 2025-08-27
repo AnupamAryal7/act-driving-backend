@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.database import get_db
-from app.auth.users.schemas import UserCreate, UserResponse
+from app.auth.users.schemas import UserCreate, UserResponse, UserLogin
 from app.auth.users.services import UserService
 
 # add router
@@ -86,4 +86,24 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error deleting user: {str(e)}"
+        )
+
+@router.post("/users/login")
+def login_user(login_data: UserLogin, db: Session = Depends(get_db)):
+    try:
+        user = UserService.authenticate_user(db,login_data.email, login_data.password)
+        return {
+            "message": "login sucessful",
+            "user": {
+                "id":user.id,
+                "email": user.email,
+                "role": user.role
+            }
+        }
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"failed during fetching data. error: {str(e)}"
         )
