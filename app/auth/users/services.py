@@ -11,6 +11,7 @@ from typing import List, Optional
 
 from app.auth.users.models import User
 from app.auth.users.schemas import UserCreate
+from app.auth.utils.password import hash_password, verify_password
 
 
 class UserService:
@@ -49,10 +50,12 @@ class UserService:
                 status_code=status.HTTP_400_NOT_FOUND,
                 detail="User already exist, can't create new user using same email"
             )
+        """hased password before adding to the production"""
+        hased_password = hash_password(user_data.password)
         
         db_user = User(
             email = user_data.email,
-            password = user_data.password,
+            password = hased_password,
             role = user_data.role
         )
 
