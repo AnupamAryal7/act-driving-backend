@@ -69,4 +69,20 @@ class UserService:
         user = UserService.get_user_by_id(db, user_id)
         db.delete(user)
         db.commit()
-        
+    
+    @staticmethod
+    def authenticate_user(db: Session, email: str, password:str) -> User:
+        """Authenticate user"""
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials"
+            )
+        if not verify_password:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Unauthorized credentials"
+            )
+        return user
+    
