@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
+
 class CourseBase(BaseModel):
     course_title: str = Field(..., max_length=50, description="length must be less than 50 characters")
     description: str

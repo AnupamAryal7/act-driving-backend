@@ -113,31 +113,13 @@ class CourseService:
         return db.query(Course).filter(Course.discounted_price >= min_price,Course.discounted_price<=max_price).all()
     
 
-
-#     @staticmethod
-#     def get_courses_by_price_range(
-#         db: Session, 
-#         min_price: float, 
-#         max_price: float,
-#         is_active: bool = True
-#     ) -> List[Course]:
-#         return db.query(Course).filter(
-#             Course.total_price >= min_price,
-#             Course.total_price <= max_price,
-#             Course.is_active == is_active
-#         ).all()
-
-#     @staticmethod
-#     def get_courses_by_package_type(
-#         db: Session, 
-#         package_type: str,
-#         is_active: bool = True
-#     ) -> List[Course]:
-#         return db.query(Course).filter(
-#             Course.package_type == package_type,
-#             Course.is_active == is_active
-#         ).all()
-
-#     @staticmethod
-#     def course_exists(db: Session, course_title: str) -> bool:
-#         return db.query(Course).filter(Course.course_title == course_title).first() is not None
+    @staticmethod
+    def get_courses_by_package_type(
+        db: Session, 
+        package_type: str,
+        is_active: bool = True
+    ) -> List[Course]:
+        return db.query(Course).filter(
+            Course.package_type == package_type,
+            Course.is_active == is_active
+        ).all()
