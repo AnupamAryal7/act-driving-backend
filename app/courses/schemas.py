@@ -1,15 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional
 
 class CourseBase(BaseModel):
-    course_title: str
+    course_title: str = Field(..., max_length=50, description="length must be less than 50 characters")
     description: str
-    bullet_pt1: str
-    bullet_pt2: str
-    bullet_pt3: str
-    duration: str
-    package_type:str
+    bullet_pt1: str = Field(..., max_length=80)
+    bullet_pt2: str = Field(..., max_length=80)
+    bullet_pt3: str = Field(..., max_length=80)
+    duration: str = Field(..., max_length=25)
+    package_type: str = Field(..., max_length=20)
     total_price: float
     discounted_price: Optional[float] = None
     is_active: bool = True
