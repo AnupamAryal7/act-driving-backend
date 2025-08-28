@@ -1,9 +1,4 @@
-# from sqlalchemy.orm import Session
-# from fastapi import HTTPException, status
-# from typing import List, Optional
 
-# from app.models import User
-# from app.schemas import UserCreate, UserUpdate
 from sqlalchemy import Text
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
