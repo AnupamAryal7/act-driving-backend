@@ -1,4 +1,3 @@
-# todo 
 #Import 
 from sqlalchemy import Column, Integer, Float, String, Text, DateTime, ForeignKey
 from sqlalchemy.sql import func
