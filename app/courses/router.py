@@ -111,7 +111,7 @@ def hard_delete_course(course_id: int, db: Session = Depends(get_db)):
 def restore_course(course_id: int, db: Session = Depends(get_db)):
     # restore a soft-deleted course
     try:
-        return CourseService.restore_course(db, course_id)
+        return CourseService.restore_course_by_id(db, course_id)
     except HTTPException as he:
         raise he
     except Exception as e:
