@@ -8,41 +8,33 @@ from app.progress_reports.models import ProgressReport
 from app.progress_reports.schemas import ProgressReportCreate, ProgressReportUpdate
 
 # class ProgressReportService:
-    
-#     # GET operations
-#     @staticmethod
-#     def get_report_by_id(db: Session, report_id: int) -> ProgressReport:
-#         """
-#         Get a single progress report by ID
-#         """
-#         report = db.query(ProgressReport).filter(ProgressReport.id == report_id).first()
-#         if not report:
-#             raise HTTPException(
-#                 status_code=status.HTTP_404_NOT_FOUND,
-#                 detail="Progress report not found"
-#             )
-#         return report
 
-#     @staticmethod
-#     def get_all_reports(
-#         db: Session, 
-#         skip: int = 0, 
-#         limit: int = 100,
-#         user_id: Optional[int] = None,
-#         course_id: Optional[int] = None
-#     ) -> List[ProgressReport]:
-#         """
-#         Get all progress reports with optional filtering
-#         """
-#         query = db.query(ProgressReport)
+class ProgressReportService:
+    # Get Operations
+    @staticmethod
+    def get_report_by_id(db:Session, report_id:int) -> ProgressReport:
+        """Fet a single progress report by ID"""
+        report = db.query(ProgressReport).filter(ProgressReport.id == report_id).first()
         
-#         if user_id is not None:
-#             query = query.filter(ProgressReport.user_id == user_id)
-            
-#         if course_id is not None:
-#             query = query.filter(ProgressReport.course_id == course_id)
-            
-#         return query.offset(skip).limit(limit).all()
+        if not report:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Progress Report not Found"
+            )
+        return report
+    
+    @staticmethod
+    def get_all_reports(db:Session, skip:int = 0, limit:int = 100, user_id:Optional[int] = None, course_id: Optional[int]= None) -> List[ProgressReport]:
+        """Get all progress reports with optional filtering"""
+        query = db.query(ProgressReport)
+
+        if user_id is not None:
+            query = query.filter(ProgressReport.user_id == user_id)
+
+        if course_id is not None:
+            query = query.filter(ProgressReport.course_id == course_id)
+
+        return query.offset(skip).limit(limit).all()
 
 #     @staticmethod
 #     def get_user_progress(db: Session, user_id: int, course_id: int) -> ProgressReport:
