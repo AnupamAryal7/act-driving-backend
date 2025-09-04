@@ -6,7 +6,7 @@ from app.reviews.router import router as reviews_router
 from app.bookings.router import router as bookings_router
 from app.courses.router import router as courses_router
 from app.auth.users.router import router as users_router 
-from app.progress_reports import router as progress_report_router
+from app.progress_reports.router import router as progress_report_router
 from app.core.config import settings
 
 # Create database tables
