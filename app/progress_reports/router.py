@@ -13,6 +13,7 @@ router = APIRouter(
 )
 
 
+
 @router.get("/", response_model=List[ProgressReport])
 def get_all_progress_reports(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -23,8 +24,8 @@ def get_all_progress_reports(
 ):
     """GEt all progress reports"""
     try:
-        service = ProgressReportService()
-        reports = service.get_all_reports(
+        # service = ProgressReportService()
+        reports = ProgressReportService.get_all_reports(
             db=db,
             skip=skip,
             limit=limit,
@@ -67,8 +68,8 @@ def get_progress_report_by_id(
     Get a specific progress report by ID.
     """
     try:
-        service = ProgressReportService()
-        report = service.get_report_by_id(db=db, report_id=report_id)
+        # service = ProgressReportService()
+        report = ProgressReportService.get_report_by_id(db=db, report_id=report_id)
         return report
     except HTTPException as e:
         raise e
@@ -88,8 +89,8 @@ def get_user_course_progress(
     Get a user's progress report for a specific course.
     """
     try:
-        service = ProgressReportService()
-        report = service.get_user_progress(
+        # service = ProgressReportService()
+        report = ProgressReportService.get_user_progress(
             db=db, 
             user_id=user_id, 
             course_id=course_id
@@ -112,8 +113,8 @@ def create_progress_report(
     Create a new progress report.
     """
     try:
-        service = ProgressReportService()
-        report = service.create_report(db=db, report_data=report_data)
+        # service = ProgressReportService()
+        report = ProgressReportService.create_report(db=db, report_data=report_data)
         return report
     except HTTPException as e:
         raise e
@@ -133,8 +134,8 @@ def update_progress_report(
     Update a progress report.
     """
     try:
-        service = ProgressReportService()
-        report = service.update_report(
+        # service = ProgressReportService()
+        report = ProgressReportService.update_report(
             db=db, 
             report_id=report_id, 
             report_data=report_data
@@ -158,8 +159,8 @@ def update_progress_percentage(
     Update only the progress percentage of a report (automatically updates status).
     """
     try:
-        service = ProgressReportService()
-        report = service.update_progress_percentage(
+        # service = ProgressReportService()
+        report = ProgressReportService.update_progress_percentage(
             db=db, 
             report_id=report_id, 
             percentage=percentage
@@ -182,8 +183,8 @@ def delete_progress_report(
     Delete a specific progress report.
     """
     try:
-        service = ProgressReportService()
-        service.delete_report(db=db, report_id=report_id)
+        # service = ProgressReportService()
+        ProgressReportService.delete_report(db=db, report_id=report_id)
         return None
     except HTTPException as e:
         raise e
@@ -202,8 +203,8 @@ def delete_user_progress_reports(
     Delete all progress reports for a specific user.
     """
     try:
-        service = ProgressReportService()
-        service.delete_user_reports(db=db, user_id=user_id)
+        # service = ProgressReportService()
+        ProgressReportService.delete_user_reports(db=db, user_id=user_id)
         return None
     except Exception as e:
         raise HTTPException(
