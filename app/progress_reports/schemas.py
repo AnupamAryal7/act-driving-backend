@@ -8,7 +8,7 @@ class ProgressReportBase(BaseModel):
     user_id: int = Field(..., description="Id of user")
     course_id: int = Field(..., description="id of course")
     progress_percentage: float = Field(0.0, ge=0.0, le=100.0, description="Progress Percentage (0.0 to 100.0)")
-    status: str = Field("not started", description="Progress status")
+    status: str = Field("not_started", description="Progress status")
     feedback: Optional[str] = Field(None, description="Instructio feedback")
     remarks: Optional[str] = Field(None, max_length=80, description="Short Remarks")
 
@@ -22,7 +22,6 @@ class ProgressReportCreate(ProgressReportBase):
 # Update schema for updating existing records(all fields optional)
 class ProgressReportUpdate(BaseModel):
     progress_percentage: Optional[float] = Field(0.0, ge=0.0, le=100.0, description="Progress Percentage (0.0 to 100.0)")
-    status: Optional[str] = Field("not started", description="Progress status")
     feedback: Optional[str] = Field(None, description="Instructio feedback")
     remarks: Optional[str] = Field(None, max_length=80, description="Short Remarks")
 
