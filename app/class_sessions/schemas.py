@@ -7,7 +7,7 @@ class ClassSessionBase(BaseModel):
     course_id: int = Field(..., description="ID of the course")
     instructor_id: int = Field(..., description="ID of the instructor user")
     date_time: datetime = Field(..., description="Start date and time of the class")
-    duration: int = Field(..., description="Duration in hour")
+    duration: float = Field(..., description="Duration in hour")
     is_active: bool = Field(True, description="Whether the class session is active")
 
 # Create schema - for creating new class sessions
