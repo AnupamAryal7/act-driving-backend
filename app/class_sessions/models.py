@@ -12,7 +12,7 @@ class ClassSession(Base):
     course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
     instructor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     date_time = Column(DateTime(timezone=True), nullable=False)
-    duration = Column(Integer, nullable=False)  # Duration in minutes
+    duration = Column(Integer, nullable=False) 
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
