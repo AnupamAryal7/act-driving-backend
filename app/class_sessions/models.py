@@ -5,7 +5,7 @@ from app.database import Base
 
 
 class ClassSession(Base):
-    __tablename__ = "class_session"
+    __tablename__ = "class_sessions"
     
     
     id = Column(Integer, primary_key=True, index=True)
