@@ -156,27 +156,23 @@ class ClassSessionService:
         session_start = session_data.date_time
         session_end = session_start + timedelta(hours=session_data.duration)
         
-        # Use SQL expression for the end time calculation
+        # Use PostgreSQL interval functions for accurate time calculation
         conflicting_sessions = db.query(ClassSession).filter(
             and_(
                 ClassSession.instructor_id == session_data.instructor_id,
                 ClassSession.is_active == True,
-                or_(
-                    # Convert duration hours to interval and check overlaps
-                    text(f"date_time + interval '1 hour' * duration >= :session_start")
-                    .bindparams(session_start=session_start),
-                    text(f"date_time + interval '1 hour' * duration <= :session_end")
-                    .bindparams(session_end=session_end),
-                    text(f"date_time >= :session_start AND date_time <= :session_end")
-                    .bindparams(session_start=session_start, session_end=session_end)
-                )
+                # Check for time overlap using database interval arithmetic
+                ClassSession.date_time < session_end,
+                ClassSession.date_time + text("interval '1 hour' * duration") > session_start
             )
         ).first()
         
         if conflicting_sessions:
+            conflict_start = conflicting_sessions.date_time
+            conflict_end = conflict_start + timedelta(hours=conflicting_sessions.duration)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Instructor already has a class scheduled during this time"
+                detail=f"Instructor already has a class from {conflict_start} to {conflict_end}"
             )
     
 # Utility function
