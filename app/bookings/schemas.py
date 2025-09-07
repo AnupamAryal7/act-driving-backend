@@ -1,36 +1,34 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional
+from pydantic import BaseModel, Field
 from datetime import datetime
+from typing import Optional
 
+# Base schema - common fields
 class BookingBase(BaseModel):
-    course_title: str
-    description: str
-    discount_price: Optional[float] = None
-    original_price: float
-    lession_description_1: Optional[str] = None
-    lession_description_2: Optional[str] = None
-    lession_description_3: Optional[str] = None
-    user_name: str
-    user_email: EmailStr
-    booking_status: str = "pending"
+    student_id: int = Field(..., description="ID of the student user")
+    class_id: int = Field(..., description="ID of the class session")
+    status: str = Field("pending", description="Booking status: pending, confirmed, cancelled, attended, no_show")
+    remarks: Optional[str] = Field(None, description="Additional remarks or notes")
 
+# Create schema - for creating new bookings
 class BookingCreate(BookingBase):
     pass
 
+# Update schema - for updating existing bookings
 class BookingUpdate(BaseModel):
-    course_title: Optional[str] = None
-    description: Optional[str] = None
-    discount_price: Optional[float] = None
-    original_price: Optional[float] = None
-    lession_description_1: Optional[str] = None
-    lession_description_2: Optional[str] = None
-    lession_description_3: Optional[str] = None
-    booking_status: Optional[str] = None
+    status: Optional[str] = Field(None, description="Booking status: pending, confirmed, cancelled, attended, no_show")
+    remarks: Optional[str] = Field(None, description="Additional remarks or notes")
 
-class BookingResponse(BookingBase):
+# Response schema - what gets returned from API
+class BookingInDBBase(BookingBase):
     id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
-    
+
     class Config:
         from_attributes = True
+
+class Booking(BookingInDBBase):
+    pass
+
+class BookingInDB(BookingInDBBase):
+    pass

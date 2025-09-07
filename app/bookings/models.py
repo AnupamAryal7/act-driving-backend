@@ -1,20 +1,14 @@
-from sqlalchemy import Column, Integer, String, Text, Float, DateTime
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean
 from sqlalchemy.sql import func
 from app.database import Base
 
 class Booking(Base):
     __tablename__ = "bookings"
-    
+
     id = Column(Integer, primary_key=True, index=True)
-    course_title = Column(String(200), nullable=False)
-    description = Column(Text, nullable=False)
-    discount_price = Column(Float, nullable=True)
-    original_price = Column(Float, nullable=False)
-    lession_description_1 = Column(Text, nullable=True)
-    lession_description_2 = Column(Text, nullable=True)
-    lession_description_3 = Column(Text, nullable=True)
-    user_name = Column(String(100), nullable=False)
-    user_email = Column(String(255), nullable=False)
-    booking_status = Column(String(45), default="pending")  # pending, confirmed, cancelled
+    student_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    class_id = Column(Integer, ForeignKey("class_sessions.id"), nullable=False)
+    status = Column(String(20), nullable=False, default="pending") 
+    remarks = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
