@@ -8,6 +8,7 @@ from app.courses.router import router as courses_router
 from app.auth.users.router import router as users_router 
 from app.progress_reports.router import router as progress_report_router
 from app.class_sessions.router import router as class_session_router
+from app.payments.router import router as payment_router
 from app.core.config import settings
 
 # Create database tables
@@ -35,6 +36,7 @@ app.include_router(users_router, prefix=settings.API_V1_PREFIX)
 app.include_router(courses_router, prefix=settings.API_V1_PREFIX)
 app.include_router(progress_report_router, prefix=settings.API_V1_PREFIX)
 app.include_router(class_session_router, prefix=settings.API_V1_PREFIX)
+app.include_router(payment_router, prefix=settings.API_V1_PREFIX)
 
 @app.get("/")
 def read_root():
