@@ -8,6 +8,7 @@ from app.payments.schemas import Payment, PaymentCreate, PaymentUpdate
 from app.payments.services import PaymentService
 
 router = APIRouter(
+    prefix="/payments",
     tags=["payments"]
 )
 
