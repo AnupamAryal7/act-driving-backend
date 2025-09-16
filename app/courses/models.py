@@ -18,5 +18,7 @@ class Course(Base):
     total_price = Column(Double, nullable= False)
     discounted_price = Column(Double, nullable=True)
     is_active = Column(Boolean, default=True)
+    image_url = Column(String(500), nullable=True)
+    image_public_id = Column(String(100), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
