@@ -14,7 +14,8 @@ class CourseBase(BaseModel):
     total_price: float
     discounted_price: Optional[float] = None
     is_active: bool = True
-
+    image_url: Optional[str] = None
+    image_public_id: Optional[str] = None
 
 
 class CourseCreate(CourseBase):
@@ -45,3 +46,8 @@ class Course(CourseInDBBase):
 
 class CourseInDB(CourseInDBBase):
     pass
+
+# Additional schema for image upload response
+class ImageUploadResponse(BaseModel):
+    url: str
+    public_id: str
