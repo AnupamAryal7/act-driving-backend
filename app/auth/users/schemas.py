@@ -5,6 +5,7 @@ import re
 
 
 class UserBase(BaseModel):
+    full_name: str = Field(..., description="Full name of the user")
     email: str = Field(..., description="user email address")
     role: str = Field(..., description="role field for student, instructor and admin")
 

@@ -14,11 +14,22 @@ class CourseBase(BaseModel):
     total_price: float
     discounted_price: Optional[float] = None
     is_active: bool = True
+    image_url: Optional[str] = None
+    image_public_id: Optional[str] = None
 
 
-
-class CourseCreate(CourseBase):
-    pass
+class CourseCreate(BaseModel):
+    """Schema for creating a course - excludes image fields as they're handled separately"""
+    course_title: str = Field(..., max_length=50, description="length must be less than 50 characters")
+    description: str
+    bullet_pt1: str = Field(..., max_length=80)
+    bullet_pt2: str = Field(..., max_length=80)
+    bullet_pt3: str = Field(..., max_length=80)
+    duration: str = Field(..., max_length=25)
+    package_type: str = Field(..., max_length=20)
+    total_price: float
+    discounted_price: Optional[float] = None
+    is_active: bool = True
 
 class CourseUpdate(BaseModel):
     course_title: Optional[str] = None
@@ -45,3 +56,8 @@ class Course(CourseInDBBase):
 
 class CourseInDB(CourseInDBBase):
     pass
+
+# Additional schema for image upload response
+class ImageUploadResponse(BaseModel):
+    url: str
+    public_id: str

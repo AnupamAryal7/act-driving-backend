@@ -49,6 +49,7 @@ class UserService:
         hased_password = hash_password(user_data.password)
         
         db_user = User(
+            full_name = user_data.full_name,
             email = user_data.email,
             password = hased_password,
             role = user_data.role
