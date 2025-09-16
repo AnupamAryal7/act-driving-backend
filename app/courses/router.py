@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Query
+from fastapi import APIRouter, Depends, status, HTTPException, Query, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.database import get_db
 from app.courses.models import Course
-from app.courses.schemas import Course, CourseCreate, CourseUpdate
+from app.courses.schemas import Course, CourseCreate, CourseUpdate, ImageUploadResponse
 from app.courses.services import CourseService
 
 # add router
@@ -77,6 +77,51 @@ def update_course(course_id: int, course_data: CourseUpdate, db: Session = Depen
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error updating course: {str(e)}"
+        )
+
+@router.post("/{course_id}/image", response_model=Course)
+async def upload_course_image(
+    course_id: int,
+    image: UploadFile = File(..., description="Course image file (JPEG, PNG, WebP)"),
+    db: Session = Depends(get_db)
+):
+    """Upload or update course image"""
+    try:
+        # Validate file type
+        allowed_types = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
+        if image.content_type not in allowed_types:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only JPEG, PNG, and WebP images are allowed"
+            )
+        
+        # Validate file size (5MB max)
+        if image.size > 5 * 1024 * 1024:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Image size must be less than 5MB"
+            )
+        
+        return await CourseService.update_course_image(db, course_id, image)
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error uploading course image: {str(e)}"
+        )
+
+@router.delete("/{course_id}/image", response_model=Course)
+def delete_course_image(course_id: int, db: Session = Depends(get_db)):
+    """Delete course image"""
+    try:
+        return CourseService.delete_course_image(db, course_id)
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error deleting course image: {str(e)}"
         )
 
 @router.delete("/{course_id}", status_code=status.HTTP_204_NO_CONTENT)
