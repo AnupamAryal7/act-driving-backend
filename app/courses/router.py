@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Depends, status, HTTPException, Query, UploadFile, File, Form
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import json
 
 from app.database import get_db
 from app.courses.models import Course
@@ -14,10 +15,52 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=Course, status_code=status.HTTP_201_CREATED)
-def create_course(course_data: CourseCreate, db: Session = Depends(get_db)):
-    # create a course
+async def create_course(
+    course_title: str = Form(..., max_length=50),
+    description: str = Form(...),
+    bullet_pt1: str = Form(..., max_length=80),
+    bullet_pt2: str = Form(..., max_length=80),
+    bullet_pt3: str = Form(..., max_length=80),
+    duration: str = Form(..., max_length=25),
+    package_type: str = Form(..., max_length=20),
+    total_price: float = Form(...),
+    discounted_price: Optional[float] = Form(None),
+    is_active: bool = Form(True),
+    image: UploadFile = File(..., description="Course image file (JPEG, PNG, WebP) - REQUIRED"),
+    db: Session = Depends(get_db)
+):
+    """Create a course with mandatory image upload"""
     try:
-        return CourseService.create_course(db, course_data)
+        # Validate image (now mandatory)
+        allowed_types = ["image/jpeg", "image/png", "image/webp", "image/jpg"]
+        if image.content_type not in allowed_types:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Only JPEG, PNG, and WebP images are allowed"
+            )
+        
+        if image.size > 5 * 1024 * 1024:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Image size must be less than 5MB"
+            )
+        
+        # Create course data object
+        course_data = CourseCreate(
+            course_title=course_title,
+            description=description,
+            bullet_pt1=bullet_pt1,
+            bullet_pt2=bullet_pt2,
+            bullet_pt3=bullet_pt3,
+            duration=duration,
+            package_type=package_type,
+            total_price=total_price,
+            discounted_price=discounted_price,
+            is_active=is_active
+        )
+        
+        return await CourseService.create_course_with_image(db, course_data, image)
+        
     except HTTPException as he:
         raise he
     except Exception as e:
