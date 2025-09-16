@@ -54,13 +54,56 @@ class CourseService:
             package_type=course_data.package_type,
             total_price=course_data.total_price,
             discounted_price=course_data.discounted_price,
-            is_active=course_data.is_active,
-            image_url=course_data.image_url,
-            image_public_id=course_data.image_public_id
+            is_active=course_data.is_active
+            # image_url and image_public_id are handled separately
         )
         db.add(db_course)
         db.commit()
         db.refresh(db_course)
+        return db_course
+    
+    @staticmethod
+    async def create_course_with_image(
+        db: Session, 
+        course_data: CourseCreate, 
+        image_file: UploadFile
+    ) -> Course:
+        """Create a course with mandatory image upload"""
+        
+        # Create the course first
+        db_course = Course(
+            course_title=course_data.course_title,
+            description=course_data.description,
+            bullet_pt1=course_data.bullet_pt1,
+            bullet_pt2=course_data.bullet_pt2,
+            bullet_pt3=course_data.bullet_pt3,
+            duration=course_data.duration,
+            package_type=course_data.package_type,
+            total_price=course_data.total_price,
+            discounted_price=course_data.discounted_price,
+            is_active=course_data.is_active
+        )
+        
+        db.add(db_course)
+        db.commit()
+        db.refresh(db_course)
+        
+        # Upload the image (mandatory)
+        try:
+            image_result = await CloudinaryService.upload_course_image(image_file, db_course.id)
+            db_course.image_url = image_result["url"]
+            db_course.image_public_id = image_result["public_id"]
+            db.commit()
+            db.refresh(db_course)
+        except Exception as e:
+            # If image upload fails, delete the created course (rollback)
+            db.delete(db_course)
+            db.commit()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Course creation failed - image upload error: {str(e)}"
+            )
+        
         return db_course
     
     @staticmethod
