@@ -93,6 +93,7 @@ class BookingService:
         db_booking = Booking(
             student_id=booking_data.student_id,
             class_id=booking_data.class_id,
+            phone_no = booking_data.phone_no,
             subrub= booking_data.subrub,
             status=booking_data.status,
             remarks=booking_data.remarks
@@ -147,6 +148,6 @@ class BookingService:
         db.query(Booking).filter(Booking.class_id == class_id).delete()
         db.commit()
 
-# Utility function
+# Utility function  
 def get_booking_service():
     return BookingService
