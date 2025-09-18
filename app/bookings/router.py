@@ -38,6 +38,17 @@ def get_all_bookings(
             detail=f"Error fetching bookings: {str(e)}"
         )
 
+@router.get("/{phone_no}", response_model = List[Booking])
+def get_all_bookings_from_phone_no(phone_no: str, db:Session = Depends(get_db)):
+    """Get all bookings for a specific phone number"""
+    try:
+        return BookingService.get_booking_from_phone_no(db, phone_no)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"error fetching bookings from phone number: {str(e)}"
+        )
+
 @router.get("/student/{student_id}", response_model=List[Booking])
 def get_student_bookings(student_id: int, db: Session = Depends(get_db)):
     """
