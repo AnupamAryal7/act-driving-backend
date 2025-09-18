@@ -93,6 +93,7 @@ class BookingService:
         db_booking = Booking(
             student_id=booking_data.student_id,
             class_id=booking_data.class_id,
+            subrub= booking_data.subrub
             status=booking_data.status,
             remarks=booking_data.remarks
         )
