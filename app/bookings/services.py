@@ -54,6 +54,11 @@ class BookingService:
     def get_class_bookings(db: Session, class_id: int) -> List[Booking]:
         """Get all bookings for a specific class"""
         return db.query(Booking).filter(Booking.class_id == class_id).all()
+    
+    @staticmethod
+    def get_booking_from_phone_no(db: Session, phone_no: str) -> List[Booking]:
+        """Get all bookings for a phone number"""
+        return db.query(Booking).filter(Booking.phone_no == phone_no).all()
 
     # CREATE operation
     @staticmethod
