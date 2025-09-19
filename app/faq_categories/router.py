@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Query
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -31,7 +31,7 @@ def create_category(
 ):
     """Create a new FAQ category"""
     try:
-        category = Faq_Category_Service.create_faq_title(db, category_data)
+        category = Faq_Category_Service.create_faq_title(db, category_data.title) 
         return category
     except HTTPException as he:
         raise he
@@ -40,7 +40,6 @@ def create_category(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error creating FAQ category: {str(e)}"
         )
-
 
 @router.put("/{category_id}", response_model=Faq_Category)
 def update_category(
