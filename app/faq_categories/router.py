@@ -8,7 +8,7 @@ from app.faq_categories.services import Faq_Category_Service
 
 # add router
 router = APIRouter(
-    prefix="/api/v1/faq-categories",
+    prefix="/faq-categories",
     tags=["FAQ Categories"]
 )
 
