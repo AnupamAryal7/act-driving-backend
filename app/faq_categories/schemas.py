@@ -16,7 +16,7 @@ class Faq_Category_Update(BaseModel):
 class Faq_Category_InDBBase(Faq_Category_Base):
     id: int
     created_at: datetime
-    updated_at: datetime = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes: True
