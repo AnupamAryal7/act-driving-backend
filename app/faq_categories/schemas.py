@@ -4,7 +4,6 @@ from typing import Optional
 
 class Faq_Category_Base(BaseModel):
         # id, title, creatd_at, updated_at
-    id: int = Field(..., description="id of the faq category")
     title: str = Field(..., max_length=100, description="title of catgory")
 
 
