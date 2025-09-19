@@ -3,8 +3,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
 from typing import List, Optional
 
-from app.faq_categories.schemas import Faq_Category, Faq_Category_Update
-
+from app.faq_categories.models import Faq_Category  # Added import
+from app.faq_categories.schemas import Faq_Category_Update  # Added import
 
 class Faq_Category_Service:
 
@@ -21,21 +21,21 @@ class Faq_Category_Service:
             )
     
     @staticmethod
-    def get_faq_title(db: Session)-> List[Faq_Category]:
+    def get_faq_title(db: Session) -> List[Faq_Category]:
         """Get all faq title"""
         return db.query(Faq_Category).order_by(Faq_Category.created_at.desc()).all()
     
     @staticmethod
-    def create_faq_title(db: Session, faq_title:str) -> Faq_Category:
+    def create_faq_title(db: Session, faq_title: str) -> Faq_Category:
         """Post a faq title"""
         # Checks if the same title already exist in our database or not
         existing_faq_title = db.query(Faq_Category).filter(Faq_Category.title == faq_title).first()
         if existing_faq_title:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Title already preasent, new title must be different from old one."
+                detail="Title already present, new title must be different from old one."
             )
-        title = Faq_Category(faq_title)
+        title = Faq_Category(title=faq_title)  # Fixed: pass as keyword argument
         db.add(title)
         db.commit()
         db.refresh(title)
@@ -45,22 +45,41 @@ class Faq_Category_Service:
     def update_category(db: Session, category_id: int, category_data: Faq_Category_Update) -> Optional[Faq_Category]:
         """Update an existing FAQ category"""
         try:
-            db_category = Faq_Category.get_category_by_id(db, category_id)
+            db_category = Faq_Category_Service.get_category_by_id(db, category_id)  # Fixed: use service method
             if not db_category:
                 return None
             
-            db_category.title = category_data.title
+            if category_data.title is not None:
+                # Check if new title already exists (excluding current category)
+                existing_category = db.query(Faq_Category).filter(
+                    Faq_Category.title == category_data.title,
+                    Faq_Category.id != category_id
+                ).first()
+                if existing_category:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Title already present, new title must be different from old one."
+                    )
+                
+                db_category.title = category_data.title
+            
             db.commit()
             db.refresh(db_category)
             return db_category
-        except SQLAlchemyError:
+        except SQLAlchemyError as e:
             db.rollback()
-            raise
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database error while updating category: {str(e)}"
+            )
 
     @staticmethod
-    def delete_faq_category(db: Session, faq_id) -> None:
+    def delete_faq_category(db: Session, faq_id: int) -> bool:  # Added return type
+        """Delete a FAQ category"""
         faqCategory = Faq_Category_Service.get_category_by_id(db, faq_id)
+        if not faqCategory:
+            return False
+        
         db.delete(faqCategory)
         db.commit()
-
-
+        return True
