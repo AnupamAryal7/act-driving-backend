@@ -57,6 +57,10 @@ class Faq_Category_Service:
             db.rollback()
             raise
 
-    
+    @staticmethod
+    def delete_faq_category(db: Session, faq_id) -> None:
+        faqCategory = Faq_Category_Service.get_category_by_id(db, faq_id)
+        db.delete(faqCategory)
+        db.commit()
 
 
