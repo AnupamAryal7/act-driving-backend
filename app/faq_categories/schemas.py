@@ -19,7 +19,7 @@ class Faq_Category_InDBBase(Faq_Category_Base):
     updated_at: datetime = None
 
     class Config:
-        from_attribute: True
+        from_attributes: True
 
 class Faq_Category(Faq_Category_InDBBase):
     pass
