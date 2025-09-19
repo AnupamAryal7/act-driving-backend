@@ -3,7 +3,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from fastapi import HTTPException, status
 from typing import List, Optional
 
-from app.faq_categories.schemas import Faq_Category
+from app.faq_categories.schemas import Faq_Category, Faq_Category_Update
 
 
 class Faq_Category_Service:
@@ -42,7 +42,7 @@ class Faq_Category_Service:
         return title
     
     @staticmethod
-    def update_category(db: Session, category_id: int, category_data: Faq_Category) -> Optional[Faq_Category]:
+    def update_category(db: Session, category_id: int, category_data: Faq_Category_Update) -> Optional[Faq_Category]:
         """Update an existing FAQ category"""
         try:
             db_category = Faq_Category.get_category_by_id(db, category_id)
