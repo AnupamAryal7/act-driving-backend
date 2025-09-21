@@ -51,7 +51,6 @@ class UserService:
     
     @staticmethod
     def create_user(db: Session, user_data: UserCreate) -> User:
-        # Check if email already exists
         existing_user = db.query(User).filter(User.email == user_data.email).first()
         if existing_user:
             raise HTTPException(
@@ -59,7 +58,6 @@ class UserService:
                 detail="User already exists with this email"
             )
         
-        # Check if phone number already exists (if provided)
         if user_data.phone_number:
             existing_phone_user = db.query(User).filter(User.phone_number == user_data.phone_number).first()
             if existing_phone_user:
@@ -87,7 +85,6 @@ class UserService:
     def update_user(db: Session, user_id: int, user_data: UserUpdate) -> User:
         user = UserService.get_user_by_id(db, user_id)
         
-        # Check if phone number already exists (if provided and changing)
         if user_data.phone_number and user_data.phone_number != user.phone_number:
             existing_phone_user = db.query(User).filter(
                 User.phone_number == user_data.phone_number,
@@ -99,7 +96,6 @@ class UserService:
                     detail="Another user already exists with this phone number"
                 )
         
-        # Update fields if provided
         if user_data.full_name is not None:
             user.full_name = user_data.full_name
         if user_data.phone_number is not None:
@@ -121,14 +117,12 @@ class UserService:
     def authenticate_user(db: Session, email: str, password: str) -> User:
         user = UserService.get_user_by_email(db, email)
         
-        # If no user found with this email
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials"
             )
         
-        # If user found but password doesn't match
         if not verify_password(password, user.password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
