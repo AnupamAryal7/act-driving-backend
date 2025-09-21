@@ -6,9 +6,7 @@ from app.database import get_db
 from app.auth.users.schemas import UserCreate, UserResponse, UserLogin, UserUpdate
 from app.auth.users.services import UserService
 
-router = APIRouter(
-    tags=["users"]
-)
+router = APIRouter(tags=["users"])
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -37,7 +35,7 @@ def get_all_users(
             detail=f"Error fetching users: {str(e)}"
         )
 
-@router.get("/search/", response_model=List[UserResponse])  # New endpoint
+@router.get("/search/", response_model=List[UserResponse])
 def search_users(
     q: str,
     skip: int = 0,
@@ -52,7 +50,7 @@ def search_users(
             detail=f"Error searching users: {str(e)}"
         )
 
-@router.get("/phone/{phone_number}", response_model=UserResponse)  # New endpoint
+@router.get("/phone/{phone_number}", response_model=UserResponse)
 def get_user_by_phone(phone_number: str, db: Session = Depends(get_db)):
     try:
         return UserService.get_user_by_phone(db, phone_number)
@@ -79,7 +77,13 @@ def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
 @router.get("/email/{email}", response_model=UserResponse)
 def get_user_by_email(email: str, db: Session = Depends(get_db)):
     try:
-        return UserService.get_user_by_email(db, email)
+        user = UserService.get_user_by_email(db, email)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        return user
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -88,7 +92,7 @@ def get_user_by_email(email: str, db: Session = Depends(get_db)):
             detail=f"Error fetching user by email: {str(e)}"
         )
 
-@router.put("/{user_id}", response_model=UserResponse)  # New endpoint
+@router.put("/{user_id}", response_model=UserResponse)
 def update_user(
     user_id: int, 
     user_data: UserUpdate, 
@@ -125,8 +129,9 @@ def login_user(login_data: UserLogin, db: Session = Depends(get_db)):
             "message": "Login successful",
             "user": {
                 "id": user.id,
+                "full_name": user.full_name,
                 "email": user.email,
-                "phone_number": user.phone_number,  # Added
+                "phone_number": user.phone_number,
                 "role": user.role
             }
         }
