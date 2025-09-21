@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from typing import List, Optional
-from sqlalchemy import or_  # Added for search functionality
+from sqlalchemy import or_
 
 from app.auth.users.models import User
 from app.auth.users.schemas import UserCreate, UserUpdate
@@ -19,17 +19,11 @@ class UserService:
         return user
     
     @staticmethod
-    def get_user_by_email(db: Session, email: str) -> User:
-        user = db.query(User).filter(User.email == email).first()
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
-            )
-        return user
+    def get_user_by_email(db: Session, email: str) -> User | None:
+        return db.query(User).filter(User.email == email).first()
     
     @staticmethod
-    def get_user_by_phone(db: Session, phone_number: str) -> User:  # New method
+    def get_user_by_phone(db: Session, phone_number: str) -> User:
         user = db.query(User).filter(User.phone_number == phone_number).first()
         if not user:
             raise HTTPException(
@@ -39,7 +33,7 @@ class UserService:
         return user
     
     @staticmethod
-    def search_users(db: Session, search_term: str, skip: int = 0, limit: int = 100) -> List[User]:  # New method
+    def search_users(db: Session, search_term: str, skip: int = 0, limit: int = 100) -> List[User]:
         return db.query(User).filter(
             or_(
                 User.full_name.ilike(f"%{search_term}%"),
@@ -79,7 +73,7 @@ class UserService:
         db_user = User(
             full_name=user_data.full_name,
             email=user_data.email,
-            phone_number=user_data.phone_number,  # Added
+            phone_number=user_data.phone_number,
             password=hashed_password,
             role=user_data.role
         )
@@ -90,7 +84,7 @@ class UserService:
         return db_user
     
     @staticmethod
-    def update_user(db: Session, user_id: int, user_data: UserUpdate) -> User:  # New method
+    def update_user(db: Session, user_id: int, user_data: UserUpdate) -> User:
         user = UserService.get_user_by_id(db, user_id)
         
         # Check if phone number already exists (if provided and changing)
@@ -125,15 +119,20 @@ class UserService:
     
     @staticmethod
     def authenticate_user(db: Session, email: str, password: str) -> User:
-        user = db.query(User).filter(User.email == email).first()
+        user = UserService.get_user_by_email(db, email)
+        
+        # If no user found with this email
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials"
             )
+        
+        # If user found but password doesn't match
         if not verify_password(password, user.password):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials"
             )
+        
         return user
