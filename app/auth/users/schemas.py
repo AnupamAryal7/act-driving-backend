@@ -1,11 +1,11 @@
 from pydantic import BaseModel, Field, field_validator
-from typing import List, Optional, Union
+from typing import List, Optional
 import re
 
 class UserBase(BaseModel):
     full_name: str = Field(..., description="Full name of the user")
     email: str = Field(..., description="User email address")
-    phone_number: Optional[str] = Field(None, description="User phone number (optional)")  # Added
+    phone_number: Optional[str] = Field(None, description="User phone number (optional)")
     role: str = Field(..., description="Role field for student, instructor and admin")
 
 class UserCreate(UserBase):
@@ -26,7 +26,6 @@ class UserCreate(UserBase):
         if not re.match(email_pattern, v):
             raise ValueError('Incorrect Email address')
         return v
-    
 
 class UserResponse(UserBase):
     id: int = Field(..., description="User id")
@@ -38,7 +37,7 @@ class UserLogin(BaseModel):
     email: str = Field(..., description="Email id required")
     password: str = Field(..., description="password field")
 
-class UserUpdate(BaseModel): 
+class UserUpdate(BaseModel):
     full_name: Optional[str] = Field(None, description="Full name of the user")
     phone_number: Optional[str] = Field(None, description="User phone number (optional)")
     role: Optional[str] = Field(None, description="Role field for student, instructor and admin")
@@ -51,4 +50,3 @@ class UserUpdate(BaseModel):
             if v not in valid_roles:
                 raise ValueError(f'Roles must be one of {", ".join(valid_roles)}')
         return v
-    
