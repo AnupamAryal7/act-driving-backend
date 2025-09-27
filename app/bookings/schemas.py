@@ -22,9 +22,7 @@ class BookingUpdate(BaseModel):
     suburb: Optional[str] = Field(None, description="Update student pickup loacation")
     status: Optional[str] = Field(None, description="Booking status: pending, confirmed, cancelled, attended, no_show")
     remarks: Optional[str] = Field(None, description="Additional remarks or notes")
-    additional_message: Optional[str]
-
-# Response schema - what gets returned from API
+    additional_message: Optional[str] = Field(None, description="Update additional message")
 class BookingInDBBase(BookingBase):
     id: int
     created_at: datetime
