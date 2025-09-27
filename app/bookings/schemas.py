@@ -8,6 +8,7 @@ class BookingBase(BaseModel):
     class_id: int = Field(..., description="ID of the class session")
     phone_no: str = Field(..., description="phone number of student")
     subrub: str = Field(None, description="pickup subrub of the students")
+    additional_message: str
     status: str = Field("pending", description="Booking status: pending, confirmed, cancelled, attended, no_show")
     remarks: Optional[str] = Field(None, description="Additional remarks or notes")
 
@@ -17,10 +18,11 @@ class BookingCreate(BookingBase):
 
 # Update schema - for updating existing bookings
 class BookingUpdate(BaseModel):
-    phone_np: Optional[str] = Field(None, description="update phone number")
+    phone_no: Optional[str] = Field(None, description="update phone number")
     subrub: Optional[str] = Field(None, description="Update student pickup loacation")
     status: Optional[str] = Field(None, description="Booking status: pending, confirmed, cancelled, attended, no_show")
     remarks: Optional[str] = Field(None, description="Additional remarks or notes")
+    additional_message: Optional[str]
 
 # Response schema - what gets returned from API
 class BookingInDBBase(BookingBase):
