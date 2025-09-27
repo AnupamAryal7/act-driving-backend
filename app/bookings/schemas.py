@@ -19,7 +19,7 @@ class BookingCreate(BookingBase):
 # Update schema - for updating existing bookings
 class BookingUpdate(BaseModel):
     phone_no: Optional[str] = Field(None, description="update phone number")
-    subrub: Optional[str] = Field(None, description="Update student pickup loacation")
+    suburb: Optional[str] = Field(None, description="Update student pickup loacation")
     status: Optional[str] = Field(None, description="Booking status: pending, confirmed, cancelled, attended, no_show")
     remarks: Optional[str] = Field(None, description="Additional remarks or notes")
     additional_message: Optional[str]
