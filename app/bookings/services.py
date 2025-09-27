@@ -98,8 +98,9 @@ class BookingService:
         db_booking = Booking(
             student_id=booking_data.student_id,
             class_id=booking_data.class_id,
-            phone_no = booking_data.phone_no,
-            subrub= booking_data.subrub,
+            phone_no=booking_data.phone_no,
+            suburb=booking_data.suburb,
+            additional_message=booking_data.additional_message,
             status=booking_data.status,
             remarks=booking_data.remarks
         )
