@@ -7,7 +7,7 @@ class BookingBase(BaseModel):
     student_id: int = Field(..., description="ID of the student user")
     class_id: int = Field(..., description="ID of the class session")
     phone_no: str = Field(..., description="phone number of student")
-    subrub: str = Field(None, description="pickup subrub of the students")
+    suburb: Optional[str] = Field(None, description="pickup subrub of the students")
     additional_message: str
     status: str = Field("pending", description="Booking status: pending, confirmed, cancelled, attended, no_show")
     remarks: Optional[str] = Field(None, description="Additional remarks or notes")
