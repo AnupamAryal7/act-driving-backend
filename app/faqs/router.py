@@ -6,7 +6,6 @@ from app.database import get_db
 from app.faqs.schemas import FAQ, FAQCreate, FAQUpdate
 from app.faqs.services import FAQService
 
-# add router
 router = APIRouter(
     prefix="/faqs",
     tags=["FAQs"]
