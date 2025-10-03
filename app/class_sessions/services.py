@@ -61,12 +61,12 @@ class ClassSessionService:
     @staticmethod
     def create_session(db: Session, session_data: ClassSessionCreate) -> ClassSession:
         # Validate instructor role
-        instructor = db.query(User).filter(User.id == session_data.instructor_id).first()
-        if not instructor or instructor.role != "instructor":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User must be an instructor to create class sessions"
-            )
+        # instructor = db.query(User).filter(User.id == session_data.instructor_id).first()
+        # if not instructor or instructor.role != "instructor":
+        #     raise HTTPException(
+        #         status_code=status.HTTP_400_BAD_REQUEST,
+        #         detail="User must be an instructor to create class sessions"
+        #     )
         
         # Validate course exists
         course = db.query(Course).filter(Course.id == session_data.course_id).first()
