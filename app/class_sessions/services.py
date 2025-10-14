@@ -154,7 +154,8 @@ class ClassSessionService:
     @staticmethod
     def _check_time_conflict(db: Session, session_data: ClassSessionCreate):
         session_start = session_data.date_time
-        session_end = session_start + timedelta(hours=session_data.duration)
+        # FIX: duration is in MINUTES, not hours
+        session_end = session_start + timedelta(minutes=session_data.duration)
         
         # Use PostgreSQL interval functions for accurate time calculation
         conflicting_sessions = db.query(ClassSession).filter(
@@ -162,14 +163,16 @@ class ClassSessionService:
                 ClassSession.instructor_id == session_data.instructor_id,
                 ClassSession.is_active == True,
                 # Check for time overlap using database interval arithmetic
+                # FIX: duration is stored in minutes, so use '1 minute' not '1 hour'
                 ClassSession.date_time < session_end,
-                ClassSession.date_time + text("interval '1 hour' * duration") > session_start
+                ClassSession.date_time + text("interval '1 minute' * duration") > session_start
             )
         ).first()
         
         if conflicting_sessions:
             conflict_start = conflicting_sessions.date_time
-            conflict_end = conflict_start + timedelta(hours=conflicting_sessions.duration)
+            # FIX: duration is in minutes
+            conflict_end = conflict_start + timedelta(minutes=conflicting_sessions.duration)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Instructor already has a class from {conflict_start} to {conflict_end}"
