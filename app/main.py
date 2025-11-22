@@ -11,6 +11,7 @@ from app.class_sessions.router import router as class_session_router
 from app.payments.router import router as payment_router
 from app.faq_categories.router import router as faq_category_router
 from app.faqs.router import router as faq_router
+from app.notifications.router import router as notifications_router
 from app.core.config import settings
 
 # Create database tables
@@ -41,6 +42,7 @@ app.include_router(class_session_router, prefix=settings.API_V1_PREFIX)
 app.include_router(payment_router, prefix=settings.API_V1_PREFIX)
 app.include_router(faq_category_router, prefix=settings.API_V1_PREFIX)
 app.include_router(faq_router, prefix=settings.API_V1_PREFIX)
+app.include_router(notifications_router, prefix=settings.API_V1_PREFIX)
 
 @app.get("/")
 def read_root():

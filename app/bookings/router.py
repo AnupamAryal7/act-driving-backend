@@ -1,16 +1,36 @@
-from fastapi import APIRouter, Depends, status, HTTPException, Query
+from fastapi import APIRouter, Depends, status, HTTPException, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List, Optional
+import httpx
 
 from app.database import get_db
 from app.bookings.models import Booking
 from app.bookings.schemas import Booking, BookingCreate, BookingUpdate
 from app.bookings.services import BookingService
+from app.notifications.schemas import BookingNotificationData
 
 router = APIRouter(
     prefix="/bookings",
     tags=["bookings"]
 )
+
+# Background task function for booking notifications
+async def send_booking_notification(booking_data: BookingNotificationData):
+    """
+    Send notification to instructors about new booking
+    This runs in the background
+    """
+    try:
+        # Call our own notification endpoint
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"http://localhost:8000/api/v1/notifications/new-booking",
+                json=booking_data.dict()
+            )
+            if response.status_code != 200:
+                print(f"Failed to send booking notification: {response.text}")
+    except Exception as e:
+        print(f"Error sending booking notification: {str(e)}")
 
 # GET endpoints
 @router.get("/", response_model=List[Booking])
@@ -38,7 +58,7 @@ def get_all_bookings(
             detail=f"Error fetching bookings: {str(e)}"
         )
 
-@router.get("/phone/{phone_no}", response_model=List[Booking])  # FIXED: Changed path to avoid conflict
+@router.get("/phone/{phone_no}", response_model=List[Booking])
 def get_all_bookings_from_phone_no(phone_no: str, db: Session = Depends(get_db)):
     """Get all bookings for a specific phone number"""
     try:
@@ -75,7 +95,7 @@ def get_class_bookings(class_id: int, db: Session = Depends(get_db)):
             detail=f"Error fetching class bookings: {str(e)}"
         )
 
-@router.get("/id/{booking_id}", response_model=Booking)  # FIXED: Changed path to avoid conflict
+@router.get("/id/{booking_id}", response_model=Booking)
 def get_booking_by_id(booking_id: int, db: Session = Depends(get_db)):
     """
     Get a specific booking by ID.
@@ -90,14 +110,36 @@ def get_booking_by_id(booking_id: int, db: Session = Depends(get_db)):
             detail=f"Error fetching booking: {str(e)}"
         )
 
-# CREATE endpoint
+# CREATE endpoint with notification
 @router.post("/", response_model=Booking, status_code=status.HTTP_201_CREATED)
-def create_booking(booking_data: BookingCreate, db: Session = Depends(get_db)):
+def create_booking(
+    booking_data: BookingCreate, 
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
     """
-    Create a new booking.
+    Create a new booking and notify instructors.
     """
     try:
-        return BookingService.create_booking(db, booking_data)
+        # Create the booking first
+        new_booking = BookingService.create_booking(db, booking_data)
+        
+        # TODO: Replace this with actual student name lookup from your user model
+        # You'll need to implement this based on your user structure
+        student_name = "Student"  # Placeholder - implement student name lookup
+        
+        # Prepare notification data
+        notification_data = BookingNotificationData(
+            booking_id=str(new_booking.id),
+            student_name=student_name,
+            booking_time=new_booking.created_at.strftime("%H:%M") if new_booking.created_at else None
+        )
+        
+        # Add background task to send notification
+        background_tasks.add_task(send_booking_notification, notification_data)
+        
+        return new_booking
+        
     except HTTPException as he:
         raise he
     except Exception as e:
