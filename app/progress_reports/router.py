@@ -1,18 +1,35 @@
-
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import Optional, List
+import httpx
 
 from app.database import get_db
 from app.progress_reports.services import ProgressReportService
 from app.progress_reports.schemas import (ProgressReport, ProgressReportCreate, ProgressReportUpdate)
+from app.notifications.schemas import ProgressNotificationData
 
 router = APIRouter(
     prefix="/progress-reports",
     tags=["progress-reports"]
 )
 
-
+# Background task function for progress report notifications
+async def send_progress_notification(progress_data: ProgressNotificationData):
+    """
+    Send notification to student about progress report update
+    This runs in the background
+    """
+    try:
+        # Call our own notification endpoint
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"http://localhost:8000/api/v1/notifications/progress-report-updated",
+                json=progress_data.dict()
+            )
+            if response.status_code != 200:
+                print(f"Failed to send progress notification: {response.text}")
+    except Exception as e:
+        print(f"Error sending progress notification: {str(e)}")
 
 @router.get("/", response_model=List[ProgressReport])
 def get_all_progress_reports(
@@ -22,7 +39,7 @@ def get_all_progress_reports(
     course_id: Optional[int] = Query(None, description="Filter by course ID"),
     db: Session = Depends(get_db)
 ):
-    """GEt all progress reports"""
+    """Get all progress reports"""
     try:
         reports = ProgressReportService.get_all_reports(
             db=db,
@@ -36,25 +53,6 @@ def get_all_progress_reports(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Report not found!!!"
-        )
-
-
-    """
-    Get all progress reports with optional filtering by user_id and/or course_id.
-    """
-    try:
-        reports = ProgressReportService.get_all_reports(
-            db=db, 
-            skip=skip, 
-            limit=limit, 
-            user_id=user_id, 
-            course_id=course_id
-        )
-        return reports
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error fetching progress reports: {str(e)}"
         )
 
 @router.get("/{report_id}", response_model=ProgressReport)
@@ -100,17 +98,30 @@ def get_user_course_progress(
             detail=f"Error fetching user progress: {str(e)}"
         )
 
+# CREATE endpoint with notification
 @router.post("/", response_model=ProgressReport, status_code=status.HTTP_201_CREATED)
 def create_progress_report(
     report_data: ProgressReportCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db)
 ):
     """
-    Create a new progress report.
+    Create a new progress report and notify student.
     """
     try:
         report = ProgressReportService.create_report(db=db, report_data=report_data)
+        
+        # Prepare notification data
+        notification_data = ProgressNotificationData(
+            progress_id=str(report.id),
+            student_id=str(report_data.user_id)  # Using user_id from the created report
+        )
+        
+        # Add background task to send notification
+        background_tasks.add_task(send_progress_notification, notification_data)
+        
         return report
+        
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -119,14 +130,16 @@ def create_progress_report(
             detail=f"Error creating progress report: {str(e)}"
         )
 
+# UPDATE endpoint with notification
 @router.put("/{report_id}", response_model=ProgressReport)
 def update_progress_report(
     report_id: int,
     report_data: ProgressReportUpdate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db)
 ):
     """
-    Update a progress report.
+    Update a progress report and notify student.
     """
     try:
         report = ProgressReportService.update_report(
@@ -134,7 +147,18 @@ def update_progress_report(
             report_id=report_id, 
             report_data=report_data
         )
+        
+        # Prepare notification data for update
+        notification_data = ProgressNotificationData(
+            progress_id=str(report.id),
+            student_id=str(report.user_id)  # Using user_id from the updated report
+        )
+        
+        # Add background task to send notification
+        background_tasks.add_task(send_progress_notification, notification_data)
+        
         return report
+        
     except HTTPException as e:
         raise e
     except Exception as e:
@@ -145,12 +169,13 @@ def update_progress_report(
 
 @router.patch("/{report_id}/progress", response_model=ProgressReport)
 def update_progress_percentage(
+    background_tasks: BackgroundTasks,
     report_id: int,
     percentage: float = Query(..., ge=0.0, le=100.0, description="Progress percentage (0.0 to 100.0)"),
     db: Session = Depends(get_db)
 ):
     """
-    Update only the progress percentage of a report (automatically updates status).
+    Update only the progress percentage of a report (automatically updates status) and notify student.
     """
     try:
         report = ProgressReportService.update_progress_percentage(
@@ -158,7 +183,18 @@ def update_progress_percentage(
             report_id=report_id, 
             percentage=percentage
         )
+        
+        # Prepare notification data
+        notification_data = ProgressNotificationData(
+            progress_id=str(report.id),
+            student_id=str(report.user_id)
+        )
+        
+        # Add background task to send notification
+        background_tasks.add_task(send_progress_notification, notification_data)
+        
         return report
+        
     except HTTPException as e:
         raise e
     except Exception as e:
