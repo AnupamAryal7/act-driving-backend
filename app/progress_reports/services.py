@@ -1,4 +1,3 @@
-
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from fastapi import HTTPException, status
@@ -7,13 +6,11 @@ from typing import List, Optional
 from app.progress_reports.models import ProgressReport
 from app.progress_reports.schemas import ProgressReportCreate, ProgressReportUpdate
 
-# class ProgressReportService:
-
 class ProgressReportService:
     # Get Operations
     @staticmethod
-    def get_report_by_id(db:Session, report_id:int) -> ProgressReport:
-        """Fet a single progress report by ID"""
+    def get_report_by_id(db: Session, report_id: int) -> ProgressReport:
+        """Fetch a single progress report by ID"""
         report = db.query(ProgressReport).filter(ProgressReport.id == report_id).first()
         
         if not report:
@@ -24,25 +21,25 @@ class ProgressReportService:
         return report
     
     @staticmethod
-    def get_all_reports(db:Session, skip:int = 0, limit:int = 100, user_id:Optional[int] = None, course_id: Optional[int]= None) -> List[ProgressReport]:
+    def get_all_reports(db: Session, skip: int = 0, limit: int = 100, user_id: Optional[int] = None, class_id: Optional[int] = None) -> List[ProgressReport]:
         """Get all progress reports with optional filtering"""
         query = db.query(ProgressReport)
 
         if user_id is not None:
             query = query.filter(ProgressReport.user_id == user_id)
 
-        if course_id is not None:
-            query = query.filter(ProgressReport.course_id == course_id)
+        if class_id is not None:
+            query = query.filter(ProgressReport.class_id == class_id)
 
         return query.offset(skip).limit(limit).all()
 
     @staticmethod
-    def get_user_progress(db: Session, user_id: int, course_id: int) -> ProgressReport:
-        """Get a user's progress for a specific course"""
+    def get_user_progress(db: Session, user_id: int, class_id: int) -> ProgressReport:
+        """Get a user's progress for a specific class session"""
         report = db.query(ProgressReport).filter(
             and_(
                 ProgressReport.user_id == user_id,
-                ProgressReport.course_id == course_id
+                ProgressReport.class_id == class_id
             )
         ).first()
 
@@ -60,23 +57,22 @@ class ProgressReportService:
         existing_report = db.query(ProgressReport).filter(
             and_(
                 ProgressReport.user_id == report_data.user_id,
-                ProgressReport.course_id == report_data.course_id
-
+                ProgressReport.class_id == report_data.class_id
             )
         ).first()
         if existing_report:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Progress report for this user already exist"
+                detail="Progress report for this user already exists"
             )
         
         db_report = ProgressReport(
-            user_id = report_data.user_id,
-            course_id = report_data.course_id,
-            progress_percentage = report_data.progress_percentage,
-            status = report_data.status,
-            feedback = report_data.feedback,
-            remarks = report_data.remarks
+            user_id=report_data.user_id,
+            class_id=report_data.class_id,
+            progress_percentage=report_data.progress_percentage,
+            status=report_data.status,
+            feedback=report_data.feedback,
+            remarks=report_data.remarks
         )
 
         db.add(db_report)
@@ -84,7 +80,6 @@ class ProgressReportService:
         db.refresh(db_report)
         return db_report
 
-    
     @staticmethod
     def update_report(db: Session, report_id: int, report_data: ProgressReportUpdate) -> ProgressReport:
         """Update progress report"""
@@ -102,23 +97,20 @@ class ProgressReportService:
     @staticmethod
     def update_progress_percentage(db: Session, report_id: int, percentage: float) -> ProgressReport:
         """Update only progress percentage for progress status"""
-        if not 0 <= percentage <=100:
+        if not 0 <= percentage <= 100:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Progress percentage must be in between 0 to 100 percentage"
+                detail="Progress percentage must be between 0 and 100"
             )
         
         report = ProgressReportService.get_report_by_id(db, report_id)
         report.progress_percentage = percentage
 
-        #Auto update status based on percentage
-
+        # Auto update status based on percentage
         if percentage == 0:
             report.status = "not_started"
-        
         elif percentage < 100:
             report.status = "in_progress"
-
         else:
             report.status = "completed"
         
@@ -142,5 +134,3 @@ class ProgressReportService:
 # Utility function
 def get_progress_report_service():
     return ProgressReportService
-
-
