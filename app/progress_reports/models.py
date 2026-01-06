@@ -9,7 +9,7 @@ class ProgressReport(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    class_id = Column(Integer, ForeignKey("class_sessions.id"), nullable=False)
     progress_percentage = Column(Float, default=0.0, nullable=False)
     status = Column(String(50), nullable=False, default="not_started")
     feedback = Column(Text, nullable=True)

@@ -6,7 +6,7 @@ from typing import Optional
 
 class ProgressReportBase(BaseModel):
     user_id: int = Field(..., description="Id of user")
-    course_id: int = Field(..., description="id of course")
+    class_id: int = Field(..., description="id of class session")
     progress_percentage: float = Field(0.0, ge=0.0, le=100.0, description="Progress Percentage (0.0 to 100.0)")
     status: str = Field("not_started", description="Progress status")
     feedback: Optional[str] = Field(None, description="Instructio feedback")
